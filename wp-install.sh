@@ -52,6 +52,15 @@ echo -e "\n\v\tNginx Configured."
 
 echo -e "\n\v\tNginx Reloaded."
 
+#Check fpm config on 12.10
+
+echo -e"\n\v\tChecking Php-fpm configuration"
+	if grep "listen = /var/run/php5-fpm.sock" /etc/php5/fpm/pool.d/www.conf 1> /dev/null;then
+	replace "listen = /var/run/php5-fpm.sock" "listen = 127.0.0.1:9000" -- /etc/php5/fpm/pool.d/www.conf
+	else 
+	echo "\n\v\tPhp-fpm Config Ok"
+	fi
+
 /etc/init.d/php5-fpm restart 1> /dev/null # restart php5-fpm
 
 echo -e "\n\v\tphp-fpm Restarted."

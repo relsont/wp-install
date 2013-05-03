@@ -90,4 +90,12 @@ rm -rf wordpress
 rm -f latest.zip
 
 echo -e "\n\v\tWordPress Installed
-\n\v\tVisit http://www.$domain to Finish set up"
+\n\v\tVisit http://www.$domain to start using your blog"
+
+
+
+#You're here because you know something. What you know, you cant explain, but you feel it.
+
+
+
+#The End.

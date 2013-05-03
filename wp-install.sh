@@ -12,7 +12,7 @@ fi
 #check if necessary packages are installed
 
 echo -e "\n\v\tChecking for Nginx, Php and Mysql"
-for package in zip nginx-common nginx-full php5 php5-fpm php5-mysql mysql-server
+for package in unzip nginx-common nginx-full php5 php5-fpm php5-mysql mysql-server
 	do
 	if dpkg --get-selections | grep $package | grep -v deinstall 1> /dev/null;then
 			echo -e "\n $package already installed"

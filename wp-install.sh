@@ -23,26 +23,74 @@ for package in unzip nginx-common nginx-full php5 php5-fpm php5-mysql mysql-serv
 		fi
 	done
 
-echo -e "\n\v\tEnter the domain name to be used"
+echo -e "\n\v\tEnter the domain name to be used e.g example.com"
 read domain
 echo "127.0.0.1 $domain" >> /etc/hosts
 echo "127.0.0.1 www.$domain" >> /etc/hosts
 echo -e "\n\v\tThank you ... $domain added"
 
+
 echo -e "\n\v\tConfiguring nginx..."
 mkdir /var/www/$domain
 cd /var/www/$domain
 
-echo -e "server {\n\tlisten 80;
-\n\tserver_name $domain;
-\n\tserver_name www.$domain;
-\n\troot /var/www/$domain/;
-\n\tindex index.html index.php;
-\n
-\n\tlocation ~ \.php$ {
-\nfastcgi_pass 127.0.0.1:9000;
-\ninclude /etc/nginx/fastcgi_params;}
-}" >> /etc/nginx/sites-available/$domain
+# Redirect Options
+
+echo -e "\n\v\tHow do you want your Redirect Setup?"
+	options=("www to non-www" "non-www to www" "No Redirect")
+	select opt in "${options[@]}"
+do
+	case $opt in
+	"www to non-www")
+		echo -e "\n\t\vSetting up Redirect : www.$domain to $domain"
+#www to non-www
+		echo -e "server {\n\tserver_name  www.$domain;
+		\n\trewrite ^(.*) http://$domain\$1 permanent;
+		\n}
+		\nserver {\n\tlisten 80;
+		\n\tserver_name $domain;
+		\n\troot /var/www/$domain/;
+		\n\tindex index.html index.php;
+		\n\tlocation ~ \.php$ {
+		\nfastcgi_pass 127.0.0.1:9000;
+		\ninclude /etc/nginx/fastcgi_params;}
+		}" >> /etc/nginx/sites-available/$domain
+		break
+		;;
+	"non-www to www")
+		echo -e "\n\t\vSetting up Redirect : $domain to www.$domain"
+#non-www to www
+		echo -e "server {\n\tserver_name $domain;
+		\n\trewrite ^(.*) http://www.$domain\$1 permanent;
+		\n}
+		\nserver {\n\tlisten 80;
+		\n\tserver_name www.$domain;
+		\n\troot /var/www/$domain/;
+		\n\tindex index.html index.php;
+		\n\tlocation ~ \.php$ {
+		\nfastcgi_pass 127.0.0.1:9000;
+		\ninclude /etc/nginx/fastcgi_params;}
+		}" >> /etc/nginx/sites-available/$domain
+		break
+		;;
+	"No Redirect")
+		echo -e "\n\t\vNo Redirection Selected."
+#No Redirect
+		echo -e "server {\n\tlisten 80;
+		\n\tserver_name $domain;
+		\n\tserver_name www.$domain;
+		\n\troot /var/www/$domain/;
+		\n\tindex index.html index.php;
+		\n\tlocation ~ \.php$ {
+		\nfastcgi_pass 127.0.0.1:9000;
+		\ninclude /etc/nginx/fastcgi_params;}
+		}" >> /etc/nginx/sites-available/$domain
+		break
+		;;
+	*)
+		echo "Invalid Option Selected";;
+	esac
+done
 
 ln -s /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/$domain
 
@@ -92,6 +140,8 @@ cp wp-config-sample.php wp-config.php
 sed -i "s/database_name_here/${domain}_db/g" wp-config.php
 sed -i "s/username_here/${dbuser}/g" wp-config.php
 sed -i "s/password_here/${dbpass}/g" wp-config.php
+key=(`date | base64`)
+sed -i "s/put your unique phrase here/"$key"/g" wp-config.php
 
 echo -e "\n\v\tCleaning up ... Deleting unwanted files."
 

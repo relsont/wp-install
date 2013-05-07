@@ -134,19 +134,21 @@ else
 exit
 fi
 
-echo -e "\n\v\tSetting up WordPress...."
+echo -e "\n\v\tSetting up WordPress....\n\v\t"
 
-cp wp-config-sample.php wp-config.php
-sed -i "s/database_name_here/${domain}_db/g" wp-config.php
-sed -i "s/username_here/${dbuser}/g" wp-config.php
-sed -i "s/password_here/${dbpass}/g" wp-config.php
-key=(`date | base64`)
-sed -i "s/put your unique phrase here/"$key"/g" wp-config.php
+cp wp-config-sample.php wp-config.php.tmp
+sed -i "s/database_name_here/${domain}_db/g" wp-config.php.tmp
+sed -i "s/username_here/${dbuser}/g" wp-config.php.tmp
+sed -i "s/password_here/${dbpass}/g" wp-config.php.tmp
+grep -A 1 -B 50 'since 2.6.0' wp-config.php.tmp > wp-config.php
+wget -qO - https://api.wordpress.org/secret-key/1.1/salt/ >> wp-config.php
+grep -A 50 -B 3 'Table prefix' wp-config.php.tmp >> wp-config.php
 
 echo -e "\n\v\tCleaning up ... Deleting unwanted files."
 
 rm -rf wordpress
 rm -f latest.zip
+rm -f wp-config.php.tmp
 
 echo -e "\n\v\tWordPress Installed
 \n\v\tVisit http://www.$domain to start using your blog"
